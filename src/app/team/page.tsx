@@ -5,6 +5,9 @@ import { teamMember } from "@/lib/team";
 import { signOut } from "../login/actions";
 import { ActiveVisit, StartVisit } from "./VisitForms";
 
+// Always render per request: the page depends on who is signed in.
+export const dynamic = "force-dynamic";
+
 export default async function TeamPage() {
   const member = await teamMember();
   if (!member) redirect("/login");
