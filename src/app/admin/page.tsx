@@ -47,7 +47,7 @@ export default async function AdminPage() {
   if (!(await isAdmin())) {
     return (
       <div className="auth"><div className="auth-card">
-        <Logo />
+        <div className="auth-logo" style={{ background: "var(--navy)", margin: "-32px -28px 0", padding: "24px", borderRadius: "16px 16px 0 0" }}><Logo height={48} /></div>
         <div><h1 style={{ fontSize: 22 }}>Polaris admin</h1><p className="hint">For the Polaris team only.</p></div>
         <AdminLoginForm demo={demoMode} />
       </div></div>

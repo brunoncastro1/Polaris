@@ -4,8 +4,8 @@ import { brand } from "@/lib/config";
 
 export default async function Account() {
   const { client } = (await getPortalData())!;
-  const rows: [string, string][] = [["Name", client.name], ["Email", client.email], ["Phone", client.phone], ["Service address", client.address],
-    ["Plan", client.plan], ["Home access", client.accessNotes], ["Preferences", client.preferences]];
+  const rows: [string, string][] = [["Contact", client.name], ["Email", client.email], ["Phone", client.phone], ["Service address", client.address],
+    ["Service plan", client.plan], ["Site access", client.accessNotes], ["Special instructions", client.preferences]];
   return (
     <>
       <div className="sec-h"><h2>My info</h2></div>

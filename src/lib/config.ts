@@ -1,9 +1,9 @@
 export const brand = {
-  name: "Polaris",
+  name: "Polaris Pro Clean",
   tagline: "Client Portal",
-  phone: "", // e.g. "(508) 555-0100" — shown in the footer when set
+  phone: "847-383-7869",
   email: "",
-  website: "", // e.g. "https://www.polarisbioclean.com"
+  website: "https://www.polarisproclean.com"
 };
 
 export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");

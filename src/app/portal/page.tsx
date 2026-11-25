@@ -21,7 +21,7 @@ export default async function Overview() {
         </div>
         <div className="panel"><div className="k">Balance due</div><div className="v">{money(due)}</div>
           <div className="sub">{due > 0 ? <span className="pill warn">{firstDue ? `Due ${fmtDate(firstDue.dueAt!, { month: "short", day: "numeric" })}` : "Open"}</span> : <span className="pill ok">All paid</span>}</div></div>
-        <div className="panel"><div className="k">Your plan</div><div className="v" style={{ fontSize: 19 }}>{client.plan || "Cleaning service"}</div>
+        <div className="panel"><div className="k">Your plan</div><div className="v" style={{ fontSize: 19 }}>{client.plan || "Commercial cleaning"}</div>
           {client.clientSince && <div className="sub">Client since {fmtDate(client.clientSince, { month: "long", year: "numeric" })}</div>}</div>
       </div>
       {last ? (
@@ -39,7 +39,7 @@ export default async function Overview() {
             </div>
           </div>
         </div>
-      ) : <div className="panel empty">After your first visit, the photos and checklist will show up here.</div>}
+      ) : <div className="panel empty">After your first service visit, the photos and checklist will show up here.</div>}
     </>
   );
 }

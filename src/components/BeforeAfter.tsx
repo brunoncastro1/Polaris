@@ -7,12 +7,12 @@ export default function BeforeAfter({ photos }: { photos: Photo[] }) {
     const m = new Map<string, { before?: string; after?: string }>();
     for (const p of photos) {
       if (p.kind === "other") continue;
-      const k = p.room || "Your home";
+      const k = p.room || "Your facility";
       m.set(k, { ...m.get(k), [p.kind]: p.url });
     }
     return [...m].filter(([, x]) => x.before && x.after).map(([room, x]) => ({ room, before: x.before!, after: x.after! }));
   }, [photos]);
-  const others = photos.filter((p) => p.kind === "other" || !pairs.some((x) => x.room === (p.room || "Your home")));
+  const others = photos.filter((p) => p.kind === "other" || !pairs.some((x) => x.room === (p.room || "Your facility")));
   const [i, setI] = useState(0);
   const [cut, setCut] = useState(50);
 

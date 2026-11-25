@@ -1,6 +1,7 @@
 import type { PortalData, Photo } from "./types";
 import { sceneUri } from "./demo-scenes";
 
+// Sample commercial client used in demo mode only.
 const photos = (rooms: string[], seed: number): Photo[] =>
   rooms.flatMap((room, i) => [
     { kind: "before" as const, room, url: sceneUri(room, true, seed + i) },
@@ -9,30 +10,30 @@ const photos = (rooms: string[], seed: number): Photo[] =>
 
 export const demoData: PortalData = {
   client: {
-    name: "Sarah Mitchell",
+    name: "Michael Reed · Lakeview Dental Group",
     email: "demo@polaris.example",
-    phone: "(508) 555-0142",
-    address: "84 Pleasant St, Framingham, MA 01701",
-    plan: "Biweekly deep clean",
-    accessNotes: "Lockbox at side door · code on file",
-    preferences: "Unscented products in bedrooms · 1 friendly dog",
-    clientSince: "2025-03-01",
+    phone: "(312) 555-0148",
+    address: "2850 N Clark St, Suite 300, Chicago, IL 60657",
+    plan: "Custodial services · 3x weekly",
+    accessNotes: "Rear entrance, key card #14 · alarm code on file",
+    preferences: "Green-certified products in treatment rooms · do not move items on front desk",
+    clientSince: "2025-04-01",
   },
   visits: [
-    { id: "v7", title: "Biweekly deep clean", status: "scheduled", startsAt: "2026-12-04T14:00:00Z", clockIn: null, clockOut: null, team: "Ana", tasks: [], teamNote: null, photos: [] },
-    { id: "v6", title: "Biweekly deep clean", status: "completed", startsAt: "2026-11-20T14:00:00Z", clockIn: "2026-11-20T14:02:00Z", clockOut: "2026-11-20T17:14:00Z", team: "Ana",
-      tasks: ["Kitchen: counters, backsplash, sink and faucet scrubbed", "Oven and microwave interior degreased", "Stovetop and range hood cleaned", "Bathroom: shower glass descaled, tub and tile scrubbed", "Toilet sanitized inside and out", "Floors vacuumed and mopped, all rooms", "Baseboards dusted, living room", "Beds made with fresh linens (2)", "Trash taken out, bins relined"],
-      teamNote: "Range hood filter is wearing out. We recommend replacing it soon. Left your mail on the kitchen table.",
-      photos: photos(["Kitchen", "Bathroom", "Living room"], 3) },
-    { id: "v5", title: "Biweekly deep clean", status: "completed", startsAt: "2026-11-06T14:00:00Z", clockIn: "2026-11-06T14:00:00Z", clockOut: "2026-11-06T16:48:00Z", team: "Ana",
-      tasks: ["Kitchen counters and sink", "Bathroom full clean", "Floors vacuumed and mopped", "Dusting, all rooms", "Trash out"], teamNote: "All good. Your dog was happy to see us.", photos: photos(["Kitchen", "Bathroom"], 9) },
-    { id: "v4", title: "Deep clean + fridge", status: "completed", startsAt: "2026-10-23T13:00:00Z", clockIn: "2026-10-23T13:10:00Z", clockOut: "2026-10-23T16:30:00Z", team: "Ana",
-      tasks: ["Refrigerator emptied, shelves washed (add-on)", "Kitchen counters and sink", "Bathroom full clean", "Floors vacuumed and mopped", "Windowsills wiped"],
-      teamNote: "Expired items from the fridge are in a bag by the door for you to check.", photos: photos(["Kitchen", "Living room"], 15) },
+    { id: "v7", title: "Custodial service", status: "scheduled", startsAt: "2026-12-04T00:00:00Z", clockIn: null, clockOut: null, team: "Ana & Carlos", tasks: [], teamNote: null, photos: [] },
+    { id: "v6", title: "Custodial service + hard floor care", status: "completed", startsAt: "2026-11-21T00:00:00Z", clockIn: "2026-11-21T00:04:00Z", clockOut: "2026-11-21T03:16:00Z", team: "Ana & Carlos",
+      tasks: ["Lobby: glass doors and entry mats cleaned", "Reception desk and waiting area dusted and disinfected", "Restrooms: fixtures sanitized, supplies restocked", "Break room: counters, sink, microwave and fridge exterior cleaned", "Trash and recycling removed from all offices", "Hard floors: auto-scrubbed and burnished, lobby and hallway", "Carpets vacuumed, offices and conference room", "High-touch points disinfected (handles, switches, elevator buttons)", "Spot cleaning of interior glass partitions"],
+      teamNote: "Paper towel dispenser in the 2nd floor men's restroom is broken. We left a refill on the counter. Recommend a replacement.",
+      photos: photos(["Lobby", "Restrooms", "Break room"], 3) },
+    { id: "v5", title: "Custodial service", status: "completed", startsAt: "2026-11-19T00:00:00Z", clockIn: "2026-11-19T00:01:00Z", clockOut: "2026-11-19T02:40:00Z", team: "Ana & Carlos",
+      tasks: ["Restrooms sanitized and restocked", "Break room cleaned", "Trash and recycling removed", "Carpets vacuumed", "High-touch points disinfected"], teamNote: "All areas completed. No issues.", photos: photos(["Restrooms", "Break room"], 9) },
+    { id: "v4", title: "Carpet extraction", status: "completed", startsAt: "2026-11-15T15:00:00Z", clockIn: "2026-11-15T15:05:00Z", clockOut: "2026-11-15T19:30:00Z", team: "Carlos & Juliana",
+      tasks: ["Hot-water extraction, conference room and 6 offices", "Pre-treatment of stains at entrance", "Furniture moved and returned", "Air movers placed to speed drying"],
+      teamNote: "Carpets will be fully dry in about 4 hours. Stain near the reception desk was reduced by about 90%.", photos: photos(["Lobby"], 15) },
   ],
   invoices: [
-    { id: "i4", number: "1048", subject: "Deep clean · Nov 20", issuedAt: "2026-11-20", dueAt: "2026-12-04", total: 185, balance: 185, status: "awaiting_payment", paymentUrl: null },
-    { id: "i3", number: "1041", subject: "Deep clean · Nov 6", issuedAt: "2026-11-06", dueAt: "2026-11-20", total: 185, balance: 0, status: "paid", paymentUrl: null },
-    { id: "i2", number: "1033", subject: "Deep clean + fridge · Oct 23", issuedAt: "2026-10-23", dueAt: "2026-11-06", total: 230, balance: 0, status: "paid", paymentUrl: null },
+    { id: "i4", number: "1048", subject: "Custodial services · November", issuedAt: "2026-11-30", dueAt: "2026-12-15", total: 2340, balance: 2340, status: "awaiting_payment", paymentUrl: null },
+    { id: "i3", number: "1044", subject: "Carpet extraction · Nov 15", issuedAt: "2026-11-15", dueAt: "2026-11-30", total: 680, balance: 0, status: "paid", paymentUrl: null },
+    { id: "i2", number: "1031", subject: "Custodial services · October", issuedAt: "2026-10-31", dueAt: "2026-11-15", total: 2340, balance: 0, status: "paid", paymentUrl: null },
   ],
 };

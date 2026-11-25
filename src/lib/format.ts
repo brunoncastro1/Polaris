@@ -1,6 +1,7 @@
-const TZ = process.env.NEXT_PUBLIC_TIMEZONE || "America/New_York";
+const TZ = process.env.NEXT_PUBLIC_TIMEZONE || "America/Chicago";
+// Date-only values ("2026-12-15") are calendar dates: format them in UTC so they never shift a day.
 export const fmtDate = (iso: string, opts: Intl.DateTimeFormatOptions = { weekday: "short", month: "short", day: "numeric" }) =>
-  new Date(iso).toLocaleDateString("en-US", { timeZone: TZ, ...opts });
+  new Date(iso).toLocaleDateString("en-US", { timeZone: /^\d{4}-\d{2}-\d{2}$/.test(iso) ? "UTC" : TZ, ...opts });
 export const fmtTime = (iso: string | null) =>
   iso ? new Date(iso).toLocaleTimeString("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" }) : "—";
 export const duration = (a: string | null, b: string | null) => {
