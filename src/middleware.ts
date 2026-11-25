@@ -21,9 +21,9 @@ export async function middleware(req: NextRequest) {
     },
   });
   const { data: { user } } = await sb.auth.getUser(); // refreshes the session cookie
-  if (!user && (req.nextUrl.pathname.startsWith("/portal") || req.nextUrl.pathname.startsWith("/set-password")))
+  if (!user && (req.nextUrl.pathname.startsWith("/portal") || req.nextUrl.pathname.startsWith("/team") || req.nextUrl.pathname.startsWith("/set-password")))
     return NextResponse.redirect(new URL("/login", req.url));
   return res;
 }
 
-export const config = { matcher: ["/portal/:path*", "/set-password", "/login"] };
+export const config = { matcher: ["/portal/:path*", "/team/:path*", "/set-password", "/login"] };

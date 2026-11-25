@@ -1,11 +1,13 @@
 import { redirect } from "next/navigation";
 import Logo from "@/components/Logo";
 import Tabs from "@/components/Tabs";
+import { teamMember } from "@/lib/team";
 import { getPortalData } from "@/lib/data";
 import { brand, demoMode } from "@/lib/config";
 import { signOut } from "../login/actions";
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
+  if (await teamMember()) redirect("/team");
   const data = await getPortalData();
   if (!data) redirect("/login");
   return (

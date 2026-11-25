@@ -133,3 +133,14 @@ curl -X POST https://portal.polarisproclean.com/api/jobber/sync \
 - Fotos ficam em armazenamento privado, com links temporários.
 - Webhooks do Jobber são verificados por assinatura (HMAC).
 - Nunca coloque as chaves (`SERVICE_ROLE`, `JOBBER_CLIENT_SECRET`, `RESEND_API_KEY`) no código — só nas variáveis da Vercel.
+
+## Visitas feitas pela equipe no portal
+
+Aplique `supabase/migrations/202611250001_team_visits.sql` depois do schema base e antes de publicar a rota `/team`.
+Crie uma conta separada de funcionário em Supabase Authentication. No SQL Editor, cadastre o usuário em `team_members`,
+o prédio e seu cliente em `team_sites`, e o par usuário/prédio em `team_assignments`. Cada prédio recebe o checklist
+padrão, que pode ser alterado na coluna `checklist`. A equipe entra pela mesma tela de login e só vê os prédios atribuídos.
+
+Na primeira versão, a visita aceita uma foto de antes e uma de depois. As fotos são armazenadas no bucket privado,
+e a localização de chegada, quando autorizada, fica no registro interno da equipe. O cliente só recebe o relatório
+depois que a visita é finalizada. Configure `RESEND_API_KEY` e `EMAIL_FROM` para habilitar a notificação.

@@ -75,7 +75,7 @@ export async function sendVisitEmail(visitId: string) {
   const { error } = await resend.emails.send({
     from: process.env.EMAIL_FROM!, to,
     subject: `Service completed${v.site_name ? ` at ${v.site_name}` : ""}: ${fmtDate(v.starts_at)} visit summary`, html,
-  });
+  }, { idempotencyKey: `visit-summary/${visitId}` });
   if (error) throw new Error("Email failed: " + JSON.stringify(error));
   await db.from("visits").update({ email_sent_at: new Date().toISOString() }).eq("id", visitId);
   return { sent: true };

@@ -2,6 +2,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { demoMode, DEMO_COOKIE, DEMO_EMAIL, DEMO_PASSWORD, siteUrl } from "@/lib/config";
+import { teamMember } from "@/lib/team";
 import { supabaseServer } from "@/lib/supabase/server";
 
 export type FormState = { error?: string; message?: string };
@@ -19,7 +20,7 @@ export async function signIn(_: FormState, form: FormData): Promise<FormState> {
   const sb = await supabaseServer();
   const { error } = await sb.auth.signInWithPassword({ email, password });
   if (error) return { error: "That email and password don't match. Try again or reset your password." };
-  redirect("/portal");
+  redirect(await teamMember() ? "/team" : "/portal");
 }
 
 export async function sendReset(_: FormState, form: FormData): Promise<FormState> {

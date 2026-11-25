@@ -122,3 +122,11 @@ code { font-size: 12.5px; background: var(--accent-soft); padding: 1px 5px; bord
 .add-contact { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .add-contact input { padding: 6px 8px; font-size: 13px; min-width: 0; flex: 1 1 110px; }
 .add-contact span { flex-basis: 100%; font-size: 12px; }
+
+.team-page { max-width: 620px; padding-bottom: 32px; }
+.team-form { display: grid; gap: 14px; }
+.team-form label { display: grid; gap: 6px; }
+.team-form select, .team-form textarea { width: 100%; font: inherit; padding: 10px; border: 1px solid #b6c5ce; border-radius: 6px; }
+.team-form fieldset { margin: 0; border: 1px solid #b6c5ce; border-radius: 6px; }
+.team-form .team-task { display: flex; align-items: center; min-height: 44px; gap: 10px; }
+.team-photo input { font: inherit; max-width: 100%; }
