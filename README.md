@@ -85,6 +85,19 @@ Cada cliente novo recebe um **convite por e-mail** para criar a senha na primeir
 
 ---
 
+## Página da Polaris (administração)
+
+Em `https://portal.SEUDOMINIO.com/admin` (senha = `ADMIN_SECRET`) a Polaris vê:
+
+- todos os clientes, quem já tem login no portal e quem ainda não foi convidado
+- se o e-mail da última visita foi enviado
+- próxima visita e saldo de cada cliente
+- botões para **enviar convite / link de senha** e **reenviar o e-mail da visita**
+- **prévia do e-mail** exatamente como o cliente recebe
+- se o Jobber está conectado
+
+No modo demonstração a senha é `admin1234`.
+
 ## Personalizar
 
 | O quê | Onde |

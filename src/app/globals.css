@@ -97,3 +97,11 @@ table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-nu
 th { text-align: left; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--line); }
 td { padding: 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
 .r { text-align: right; }
+
+/* Admin */
+.btn.small { padding: 5px 10px; font-size: 12.5px; border-radius: 7px; }
+.btn.ghosty { background: var(--accent-soft); color: var(--accent); }
+.act { display: grid; gap: 4px; justify-items: start; margin-top: 6px; }
+.act span { font-size: 12px; white-space: normal; max-width: 200px; }
+table.admin td { vertical-align: top; }
+code { font-size: 12.5px; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; }
