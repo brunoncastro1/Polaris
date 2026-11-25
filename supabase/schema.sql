@@ -101,10 +101,12 @@ create policy "own invoices" on invoices for select using (client_id in (select 
 
 -- Newer Supabase projects don't expose new tables to signed-in users automatically.
 -- Grant read access; Row Level Security above still limits each client to their own rows.
+-- Start from nothing (some projects grant TRUNCATE/TRIGGER/REFERENCES by default; RLS doesn't cover TRUNCATE),
+-- then allow signed-in clients to read only. All writes happen server-side with the service role.
+revoke all privileges on table clients, client_users, visits, visit_photos, invoices, jobber_tokens from anon, authenticated;
 grant usage on schema public to authenticated;
-grant select on clients, client_users, visits, visit_photos, invoices to authenticated;
+grant select on table clients, client_users, visits, visit_photos, invoices to authenticated;
 grant execute on function my_client_ids() to authenticated;
-revoke all on jobber_tokens from anon, authenticated;
 
 -- Private bucket for photos; the portal serves them through short-lived signed URLs.
 insert into storage.buckets (id, name, public) values ('visit-photos', 'visit-photos', false)
