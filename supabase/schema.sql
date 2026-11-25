@@ -99,6 +99,13 @@ create policy "own photos" on visit_photos for select
   using (visit_id in (select id from visits where client_id in (select my_client_ids())));
 create policy "own invoices" on invoices for select using (client_id in (select my_client_ids()));
 
+-- Newer Supabase projects don't expose new tables to signed-in users automatically.
+-- Grant read access; Row Level Security above still limits each client to their own rows.
+grant usage on schema public to authenticated;
+grant select on clients, client_users, visits, visit_photos, invoices to authenticated;
+grant execute on function my_client_ids() to authenticated;
+revoke all on jobber_tokens from anon, authenticated;
+
 -- Private bucket for photos; the portal serves them through short-lived signed URLs.
 insert into storage.buckets (id, name, public) values ('visit-photos', 'visit-photos', false)
   on conflict (id) do nothing;
