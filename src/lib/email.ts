@@ -7,7 +7,7 @@ import { fmtDate, fmtTime, duration } from "./format";
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!));
 
 export type EmailVisit = {
-  firstName: string; title: string; startsAt: string; clockIn: string | null; clockOut: string | null;
+  firstName: string; title: string; site: string | null; startsAt: string; clockIn: string | null; clockOut: string | null;
   team: string; tasks: string[]; teamNote: string | null; pairs: { room: string; before: string; after: string }[];
   nextVisit: string | null;
 };
@@ -27,7 +27,7 @@ export function visitEmailHtml(v: EmailVisit) {
 <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:10px;overflow:hidden">
   <tr><td style="background:${navy};padding:20px 24px"><img src="${siteUrl}/logo-white.png" alt="${esc(brand.name)}" height="44" style="display:block;height:44px;width:auto;border:0"></td></tr>
   <tr><td style="padding:28px 24px 8px;font:700 22px Arial,sans-serif;color:#14232e">Hi ${esc(v.firstName)}, your facility is all set</td></tr>
-  <tr><td style="padding:0 24px 18px;font:15px/1.6 Arial,sans-serif;color:#33434e">${esc(v.team || "Our team")} completed your ${esc(v.title.toLowerCase())} on ${esc(fmtDate(v.startsAt, { weekday: "long", month: "long", day: "numeric" }))}. Here's what we did.</td></tr>
+  <tr><td style="padding:0 24px 18px;font:15px/1.6 Arial,sans-serif;color:#33434e">${esc(v.team || "Our team")} completed your ${esc(v.title.toLowerCase())}${v.site ? ` at <b>${esc(v.site)}</b>` : ""} on ${esc(fmtDate(v.startsAt, { weekday: "long", month: "long", day: "numeric" }))}. Here's what we did.</td></tr>
   <tr><td style="padding:0 24px 22px"><table width="100%" cellpadding="12" cellspacing="0" style="background:#e8eef6;border-radius:8px;font:13px Arial,sans-serif;color:#5d6f7b"><tr>
     <td>ARRIVED<br><b style="font-size:15px;color:#14232e">${fmtTime(v.clockIn)}</b></td>
     <td>FINISHED<br><b style="font-size:15px;color:#14232e">${fmtTime(v.clockOut)}</b></td>
@@ -46,7 +46,10 @@ export function visitEmailHtml(v: EmailVisit) {
 export async function sendVisitEmail(visitId: string) {
   const db = supabaseAdmin();
   const { data: v } = await db.from("visits").select("*, clients(*), visit_photos(*)").eq("id", visitId).single();
-  if (!v || v.email_sent_at || v.status !== "completed" || !v.clients?.email) return { sent: false };
+  if (!v || v.email_sent_at || v.status !== "completed") return { sent: false };
+  const { data: contacts } = await db.from("client_users").select("email").eq("client_id", v.client_id);
+  const to = [...new Set([v.clients?.email, ...(contacts ?? []).map((c) => c.email)].filter(Boolean).map((e) => String(e).toLowerCase()))];
+  if (!to.length) return { sent: false };
 
   // Signed links valid 30 days so the email images keep working.
   const byRoom = new Map<string, { before?: string; after?: string }>();
@@ -63,15 +66,15 @@ export async function sendVisitEmail(visitId: string) {
     .gt("starts_at", new Date().toISOString()).order("starts_at").limit(1).maybeSingle();
 
   const html = visitEmailHtml({
-    firstName: String(v.clients.name).split(" ")[0], title: v.title ?? "cleaning visit", startsAt: v.starts_at,
+    firstName: String(v.clients.contact_name || v.clients.name).split(" ")[0], title: v.title ?? "cleaning visit", site: v.site_name, startsAt: v.starts_at,
     clockIn: v.clock_in, clockOut: v.clock_out, team: v.team ?? "", tasks: v.tasks ?? [], teamNote: v.team_note,
     pairs, nextVisit: next?.starts_at ?? null,
   });
 
   const resend = new Resend(process.env.RESEND_API_KEY);
   const { error } = await resend.emails.send({
-    from: process.env.EMAIL_FROM!, to: v.clients.email,
-    subject: `Service completed: ${fmtDate(v.starts_at)} visit summary`, html,
+    from: process.env.EMAIL_FROM!, to,
+    subject: `Service completed${v.site_name ? ` at ${v.site_name}` : ""}: ${fmtDate(v.starts_at)} visit summary`, html,
   });
   if (error) throw new Error("Email failed: " + JSON.stringify(error));
   await db.from("visits").update({ email_sent_at: new Date().toISOString() }).eq("id", visitId);

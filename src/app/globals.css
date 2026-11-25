@@ -108,3 +108,17 @@ td { padding: 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
 .act span { font-size: 12px; white-space: normal; max-width: 200px; }
 table.admin td { vertical-align: top; }
 code { font-size: 12.5px; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; }
+
+/* Buildings */
+.chip { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 99px; padding: 6px 14px; font-size: 13px; text-decoration: none; }
+.chip[aria-current="page"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.sites { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 12px; }
+.site { display: grid; gap: 2px; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; color: var(--fg); text-decoration: none; }
+.site:hover { border-color: var(--accent); }
+
+.contacts { display: grid; gap: 8px; }
+.contact { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; align-items: center; padding-bottom: 8px; border-bottom: 1px dashed var(--line); }
+.contact .act { grid-column: 1 / -1; margin-top: 0; }
+.add-contact { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.add-contact input { padding: 6px 8px; font-size: 13px; min-width: 0; flex: 1 1 110px; }
+.add-contact span { flex-basis: 100%; font-size: 12px; }

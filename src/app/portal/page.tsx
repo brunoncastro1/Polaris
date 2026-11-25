@@ -8,15 +8,17 @@ export default async function Overview() {
   const now = Date.now();
   const next = visits.filter((v) => v.status === "scheduled" && +new Date(v.startsAt) > now).sort((a, b) => +new Date(a.startsAt) - +new Date(b.startsAt))[0];
   const last = visits.find((v) => v.status === "completed");
+  const sites = [...new Set(visits.map((v) => v.site).filter(Boolean))] as string[];
   const due = invoices.reduce((a, i) => a + i.balance, 0);
   const firstDue = invoices.filter((i) => i.balance > 0 && i.dueAt).sort((a, b) => a.dueAt!.localeCompare(b.dueAt!))[0];
 
   return (
     <>
-      <div className="greet"><h1>Hi, {client.name.split(" ")[0]}</h1><p className="sub">{client.address}</p></div>
+      <div className="greet"><h1>Hi, {client.contactName.split(" ")[0]}</h1>
+        <p className="sub">{client.name}{sites.length > 1 ? ` · ${sites.length} buildings` : client.address ? ` · ${client.address}` : ""}</p></div>
       <div className="grid3">
         <div className="panel"><div className="k">Next visit</div>
-          {next ? <><div className="v">{fmtDate(next.startsAt)}</div><div className="sub">{fmtTime(next.startsAt)}{next.team && ` · ${next.team}`}</div></>
+          {next ? <><div className="v">{fmtDate(next.startsAt)}</div><div className="sub">{[fmtTime(next.startsAt), next.site].filter(Boolean).join(" · ")}</div></>
                 : <><div className="v">Not scheduled</div><div className="sub">We&apos;ll post it here once it&apos;s booked.</div></>}
         </div>
         <div className="panel"><div className="k">Balance due</div><div className="v">{money(due)}</div>
@@ -26,7 +28,7 @@ export default async function Overview() {
       </div>
       {last ? (
         <div className="panel" style={{ display: "grid", gap: 14 }}>
-          <div className="sec-h"><h2>Last visit · {fmtDate(last.startsAt)}</h2><Link href={`/portal/visits/${last.id}`} style={{ fontWeight: 600 }}>Open visit →</Link></div>
+          <div className="sec-h"><h2>Last visit · {fmtDate(last.startsAt)}{last.site && <span className="sub" style={{ fontWeight: 400 }}> · {last.site}</span>}</h2><Link href={`/portal/visits/${last.id}`} style={{ fontWeight: 600 }}>Open visit →</Link></div>
           <div className="detail">
             <BeforeAfter photos={last.photos} />
             <div><span className="pill ok">Completed</span>
@@ -40,6 +42,21 @@ export default async function Overview() {
           </div>
         </div>
       ) : <div className="panel empty">After your first service visit, the photos and checklist will show up here.</div>}
+      {sites.length > 1 && (
+        <div className="panel"><h2 style={{ fontSize: 16 }}>Your buildings</h2>
+          <div className="sites">{sites.map((s) => {
+            const vs = visits.filter((v) => v.site === s);
+            const lastS = vs.find((v) => v.status === "completed");
+            const nextS = vs.filter((v) => v.status === "scheduled" && +new Date(v.startsAt) > now).sort((a, b) => +new Date(a.startsAt) - +new Date(b.startsAt))[0];
+            return (
+              <Link key={s} className="site" href={`/portal/visits?site=${encodeURIComponent(s)}`}>
+                <b>{s}</b>
+                <span className="sub">Last: {lastS ? fmtDate(lastS.startsAt) : "—"} · Next: {nextS ? fmtDate(nextS.startsAt) : "—"}</span>
+              </Link>
+            );
+          })}</div>
+        </div>
+      )}
     </>
   );
 }

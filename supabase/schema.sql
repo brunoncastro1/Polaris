@@ -2,9 +2,9 @@
 
 create table if not exists clients (
   id uuid primary key default gen_random_uuid(),
-  auth_user_id uuid unique references auth.users(id) on delete set null,
   jobber_client_id text unique not null,
-  name text not null,
+  name text not null,                               -- company name, e.g. "Lakeshore Property Management"
+  contact_name text,                                -- main contact from Jobber
   email text,
   phone text,
   address text,
@@ -15,11 +15,26 @@ create table if not exists clients (
   created_at timestamptz default now()
 );
 
+-- People who can sign in for a client (manager, owner's rep, front desk...).
+create table if not exists client_users (
+  id uuid primary key default gen_random_uuid(),
+  client_id uuid not null references clients(id) on delete cascade,
+  email text not null,
+  name text,
+  auth_user_id uuid unique references auth.users(id) on delete set null,
+  invited_at timestamptz,
+  created_at timestamptz default now(),
+  unique (client_id, email)
+);
+
 create table if not exists visits (
   id uuid primary key default gen_random_uuid(),
   jobber_visit_id text unique not null,
   client_id uuid not null references clients(id) on delete cascade,
   title text,
+  jobber_property_id text,
+  site_name text,                                   -- building / property
+  site_address text,
   status text not null default 'scheduled',        -- scheduled | completed
   starts_at timestamptz,
   clock_in timestamptz,
@@ -66,18 +81,23 @@ create table if not exists jobber_tokens (
 
 -- Row Level Security: a signed-in client sees only their own rows.
 alter table clients enable row level security;
+alter table client_users enable row level security;
 alter table visits enable row level security;
 alter table visit_photos enable row level security;
 alter table invoices enable row level security;
 alter table jobber_tokens enable row level security;  -- no policies = no client access
 
-create policy "own client row" on clients for select using (auth_user_id = auth.uid());
-create policy "own visits" on visits for select
-  using (client_id in (select id from clients where auth_user_id = auth.uid()));
+-- Clients the signed-in person belongs to.
+create or replace function my_client_ids() returns setof uuid
+  language sql stable security definer set search_path = public
+  as $$ select client_id from client_users where auth_user_id = auth.uid() $$;
+
+create policy "own membership" on client_users for select using (auth_user_id = auth.uid());
+create policy "own client row" on clients for select using (id in (select my_client_ids()));
+create policy "own visits" on visits for select using (client_id in (select my_client_ids()));
 create policy "own photos" on visit_photos for select
-  using (visit_id in (select v.id from visits v join clients c on c.id = v.client_id where c.auth_user_id = auth.uid()));
-create policy "own invoices" on invoices for select
-  using (client_id in (select id from clients where auth_user_id = auth.uid()));
+  using (visit_id in (select id from visits where client_id in (select my_client_ids())));
+create policy "own invoices" on invoices for select using (client_id in (select my_client_ids()));
 
 -- Private bucket for photos; the portal serves them through short-lived signed URLs.
 insert into storage.buckets (id, name, public) values ('visit-photos', 'visit-photos', false)

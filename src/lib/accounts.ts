@@ -2,22 +2,33 @@ import "server-only";
 import { supabaseAdmin } from "./supabase/admin";
 import { siteUrl } from "./config";
 
-/** Give a client a portal login: send a Supabase invite email the first time we see them. */
-export async function ensureClientLogin(clientId: string) {
+/** Add a person who can sign in for a client, and email them an invite if they don't have a login yet. */
+export async function ensureContact(clientId: string, email: string, name?: string | null) {
   const db = supabaseAdmin();
-  const { data: c } = await db.from("clients").select("id, email, auth_user_id, name").eq("id", clientId).single();
-  if (!c || c.auth_user_id || !c.email) return;
-  const { data, error } = await db.auth.admin.inviteUserByEmail(c.email, {
+  const clean = email.trim().toLowerCase();
+  const { data: row, error } = await db.from("client_users")
+    .upsert({ client_id: clientId, email: clean, ...(name ? { name } : {}) }, { onConflict: "client_id,email" })
+    .select().single();
+  if (error) throw error;
+  if (row.auth_user_id) return { status: "active" as const };
+
+  const { data, error: inviteErr } = await db.auth.admin.inviteUserByEmail(clean, {
     redirectTo: `${siteUrl}/auth/callback?next=/set-password`,
-    data: { name: c.name },
+    data: { name: name ?? undefined },
   });
-  if (error) {
-    // Already registered (e.g. invited earlier): link the existing user instead.
+  let userId = data?.user?.id;
+  if (inviteErr) {
+    // Already has a login (e.g. contact for another client): link it.
     const { data: list } = await db.auth.admin.listUsers({ perPage: 1000 });
-    const existing = list?.users.find((u) => u.email?.toLowerCase() === c.email!.toLowerCase());
-    if (existing) await db.from("clients").update({ auth_user_id: existing.id }).eq("id", c.id);
-    else console.error("invite failed", error);
-    return;
+    userId = list?.users.find((u) => u.email?.toLowerCase() === clean)?.id;
+    if (!userId) { console.error("invite failed", inviteErr); return { status: "failed" as const }; }
   }
-  await db.from("clients").update({ auth_user_id: data.user.id }).eq("id", c.id);
+  await db.from("client_users").update({ auth_user_id: userId, invited_at: new Date().toISOString() }).eq("id", row.id);
+  return { status: "invited" as const };
+}
+
+/** Invite the client's main contact from Jobber the first time we see them. */
+export async function ensureClientLogin(clientId: string) {
+  const { data: c } = await supabaseAdmin().from("clients").select("email, contact_name").eq("id", clientId).single();
+  if (c?.email) await ensureContact(clientId, c.email, c.contact_name);
 }

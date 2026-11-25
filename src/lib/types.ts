@@ -3,6 +3,8 @@ export type Photo = { kind: "before" | "after" | "other"; room: string | null; u
 export type Visit = {
   id: string;
   title: string;
+  site: string | null;
+  siteAddress: string | null;
   status: "scheduled" | "completed";
   startsAt: string;
   clockIn: string | null;
@@ -26,7 +28,8 @@ export type Invoice = {
 };
 
 export type Client = {
-  name: string;
+  name: string;          // company
+  contactName: string;   // person signed in
   email: string;
   phone: string;
   address: string;

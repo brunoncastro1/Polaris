@@ -15,8 +15,9 @@ export async function getPortalData(): Promise<PortalData | null> {
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return null;
 
-  const { data: c } = await sb.from("clients").select("*").eq("auth_user_id", user.id).maybeSingle();
-  if (!c) return { client: { name: user.email ?? "", email: user.email ?? "", phone: "", address: "", plan: "", accessNotes: "", preferences: "", clientSince: null }, visits: [], invoices: [] };
+  const { data: member } = await sb.from("client_users").select("name, client_id, clients(*)").eq("auth_user_id", user.id).limit(1).maybeSingle();
+  const c: any = member?.clients;
+  if (!c) return { client: { name: user.email ?? "", contactName: user.email ?? "", email: user.email ?? "", phone: "", address: "", plan: "", accessNotes: "", preferences: "", clientSince: null }, visits: [], invoices: [] };
 
   const [{ data: vs }, { data: inv }] = await Promise.all([
     sb.from("visits").select("*, visit_photos(*)").eq("client_id", c.id).order("starts_at", { ascending: false }).limit(100),
@@ -32,14 +33,14 @@ export async function getPortalData(): Promise<PortalData | null> {
   }
 
   const visits: Visit[] = (vs ?? []).map((v: any) => ({
-    id: v.id, title: v.title ?? "Cleaning visit", status: v.status, startsAt: v.starts_at,
+    id: v.id, title: v.title ?? "Cleaning visit", site: v.site_name, siteAddress: v.site_address, status: v.status, startsAt: v.starts_at,
     clockIn: v.clock_in, clockOut: v.clock_out, team: v.team ?? "", tasks: v.tasks ?? [], teamNote: v.team_note,
     photos: (v.visit_photos ?? []).filter((p: any) => signed.has(p.storage_path))
       .map((p: any) => ({ kind: p.kind, room: p.room, url: signed.get(p.storage_path)! })),
   }));
 
   return {
-    client: { name: c.name, email: c.email ?? "", phone: c.phone ?? "", address: c.address ?? "", plan: c.plan ?? "",
+    client: { name: c.name, contactName: member?.name || c.contact_name || c.name, email: user.email ?? c.email ?? "", phone: c.phone ?? "", address: c.address ?? "", plan: c.plan ?? "",
       accessNotes: c.access_notes ?? "", preferences: c.preferences ?? "", clientSince: c.client_since },
     visits,
     invoices: (inv ?? []).map((i: any) => ({ id: i.id, number: i.number ?? "", subject: i.subject ?? "", issuedAt: i.issued_at,

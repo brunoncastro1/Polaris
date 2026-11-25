@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   const byRoom = new Map<string, { before?: string; after?: string }>();
   v.photos.forEach((p) => p.room && p.kind !== "other" && byRoom.set(p.room, { ...byRoom.get(p.room), [p.kind]: p.url }));
   const html = visitEmailHtml({
-    firstName: demoData.client.name.split(" ")[0], title: v.title, startsAt: v.startsAt, clockIn: v.clockIn, clockOut: v.clockOut,
+    firstName: demoData.client.contactName.split(" ")[0], title: v.title, site: v.site, startsAt: v.startsAt, clockIn: v.clockIn, clockOut: v.clockOut,
     team: v.team, tasks: v.tasks, teamNote: v.teamNote, nextVisit: next?.startsAt ?? null,
     pairs: [...byRoom].map(([room, x]) => ({ room, before: x.before!, after: x.after! })),
   });

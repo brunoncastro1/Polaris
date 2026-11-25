@@ -11,12 +11,13 @@ export default async function VisitPage({ params }: { params: Promise<{ id: stri
   return (
     <>
       <Link href="/portal/visits" style={{ fontWeight: 600 }}>← All visits</Link>
-      <div className="sec-h"><div><h1 style={{ fontSize: 24 }}>{fmtDate(v.startsAt, { weekday: "long", month: "long", day: "numeric" })}</h1><p className="sub">{v.title}</p></div>
+      <div className="sec-h"><div><h1 style={{ fontSize: 24 }}>{fmtDate(v.startsAt, { weekday: "long", month: "long", day: "numeric" })}</h1><p className="sub">{[v.site, v.title].filter(Boolean).join(" · ")}</p></div>
         <span className={`pill ${v.status === "completed" ? "ok" : "info"}`}>{v.status === "completed" ? "Completed" : "Scheduled"}</span></div>
       <div className="detail">
         <BeforeAfter photos={v.photos} />
         <div className="panel"><h2 style={{ fontSize: 16 }}>Visit details</h2>
           <dl className="meta">
+            {v.site && <><dt>Building</dt><dd>{v.site}{v.siteAddress && <div className="sub">{v.siteAddress}</div>}</dd></>}
             {v.team && <><dt>Team</dt><dd>{v.team}</dd></>}
             <dt>Arrived</dt><dd>{fmtTime(v.clockIn)}</dd>
             <dt>Finished</dt><dd>{fmtTime(v.clockOut)}</dd>

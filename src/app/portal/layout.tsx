@@ -13,7 +13,7 @@ export default async function PortalLayout({ children }: { children: React.React
       {demoMode && <div className="demo-bar">Demo mode · sample data</div>}
       <header className="top"><div className="wrap">
         <Logo />
-        <div className="who"><span>{data.client.name}</span>
+        <div className="who"><span>{data.client.contactName} · {data.client.name}</span>
           <form action={signOut}><button className="btn ghost" type="submit">Log out</button></form>
         </div>
       </div></header>

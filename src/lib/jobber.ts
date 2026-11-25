@@ -83,10 +83,11 @@ query PortalVisit($id: EncodedId!) {
       id
       name
       firstName
+      lastName
       emails { address primary }
       phones { number primary }
     }
-    property { address { street city province postalCode } }
+    property { id address { street street2 city province postalCode } }
     job {
       id
       title
@@ -144,7 +145,7 @@ export async function syncVisit(jobberVisitId: string) {
   const address = a ? [a.street, a.city, [a.province, a.postalCode].filter(Boolean).join(" ")].filter(Boolean).join(", ") : null;
 
   const { data: client, error: ce } = await db.from("clients")
-    .upsert({ jobber_client_id: c.id, name: c.name ?? "Client", email, phone, address }, { onConflict: "jobber_client_id" })
+    .upsert({ jobber_client_id: c.id, name: c.name ?? "Client", contact_name: [c.firstName, c.lastName].filter(Boolean).join(" ") || null, email, phone, address }, { onConflict: "jobber_client_id" })
     .select().single();
   if (ce) throw ce;
 
@@ -158,6 +159,9 @@ export async function syncVisit(jobberVisitId: string) {
     jobber_visit_id: v.id,
     client_id: client.id,
     title: v.title ?? v.job?.title ?? "Cleaning visit",
+    jobber_property_id: v.property?.id ?? null,
+    site_name: a?.street2 ? `${a.street} ${a.street2}` : a?.street ?? null,  // rename sites in Jobber's property address
+    site_address: address,
     status: completed ? "completed" : "scheduled",
     starts_at: v.startAt,
     clock_in: v.startAt,               // replaced by timesheet times below when available

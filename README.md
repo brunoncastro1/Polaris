@@ -73,6 +73,14 @@ O site continua no HostGator; o portal fica no subdomínio `portal.polarisprocle
 
 ---
 
+## Clientes com vários prédios e várias pessoas
+
+- No Jobber, cadastre **a empresa como um cliente** (ex.: "Lakeshore Property Management") e **cada prédio como uma propriedade** (Property) desse cliente.
+  Use o campo de endereço linha 2 para o nome do prédio se quiser (ex.: `2850 N Clark St` + `Clark Street Medical Building`).
+- No portal, o cliente vê **todos os prédios** num lugar só e pode filtrar as visitas por prédio.
+- O contato principal do Jobber recebe o convite automaticamente. Para dar acesso a **mais pessoas** (gerente, síndico, recepção),
+  use **/admin → Add & invite**. Todas as pessoas com acesso recebem o e-mail de cada visita.
+
 ## Como a equipe usa no Jobber (padrão das fotos)
 
 Para o portal saber o que é "antes" e "depois":
@@ -92,7 +100,8 @@ Cada cliente novo recebe um **convite por e-mail** para criar a senha na primeir
 
 Em `https://portal.polarisproclean.com/admin` (senha = `ADMIN_SECRET`) a Polaris vê:
 
-- todos os clientes, quem já tem login no portal e quem ainda não foi convidado
+- todos os clientes, quantos prédios cada um tem e as pessoas com acesso ao portal
+- **adicionar mais pessoas** de uma empresa e enviar o convite
 - se o e-mail da última visita foi enviado
 - próxima visita e saldo de cada cliente
 - botões para **enviar convite / link de senha** e **reenviar o e-mail da visita**

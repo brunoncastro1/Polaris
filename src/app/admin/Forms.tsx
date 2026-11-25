@@ -1,6 +1,6 @@
 "use client";
 import { useActionState } from "react";
-import { adminLogin, resendInvite, resendVisitEmail, type AdminState } from "./actions";
+import { adminLogin, inviteContact, addContact, resendVisitEmail, type AdminState } from "./actions";
 
 export function AdminLoginForm({ demo }: { demo: boolean }) {
   const [s, action, pending] = useActionState<AdminState, FormData>(adminLogin, {});
@@ -14,12 +14,25 @@ export function AdminLoginForm({ demo }: { demo: boolean }) {
   );
 }
 
-export function InviteButton({ clientId, hasLogin }: { clientId: string; hasLogin: boolean }) {
-  const [s, action, pending] = useActionState<AdminState, FormData>(resendInvite, {});
+export function InviteButton({ contactId, hasLogin }: { contactId: string; hasLogin: boolean }) {
+  const [s, action, pending] = useActionState<AdminState, FormData>(inviteContact, {});
   return (
     <form action={action} className="act">
+      <input type="hidden" name="contactId" value={contactId} />
+      <button className="btn small ghosty" disabled={pending}>{hasLogin ? "Send password link" : "Send invite"}</button>
+      {(s.message || s.error) && <span className={s.error ? "err" : "okmsg"}>{s.message || s.error}</span>}
+    </form>
+  );
+}
+
+export function AddContactForm({ clientId }: { clientId: string }) {
+  const [s, action, pending] = useActionState<AdminState, FormData>(addContact, {});
+  return (
+    <form action={action} className="add-contact">
       <input type="hidden" name="clientId" value={clientId} />
-      <button className="btn small" disabled={pending}>{hasLogin ? "Send password link" : "Send invite"}</button>
+      <input name="name" placeholder="Name" aria-label="Contact name" id={`n-${clientId}`} />
+      <input name="email" type="email" placeholder="email@company.com" aria-label="Contact email" required id={`e-${clientId}`} />
+      <button className="btn small" disabled={pending}>Add &amp; invite</button>
       {(s.message || s.error) && <span className={s.error ? "err" : "okmsg"}>{s.message || s.error}</span>}
     </form>
   );
