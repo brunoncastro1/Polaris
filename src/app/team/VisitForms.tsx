@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { MAX_PHOTO_PAIRS, teamPhotoName } from "@/lib/team-photos";
 import { finishTeamVisit, startTeamVisit, uploadTeamPhoto } from "./actions";
 
 type Site = { id: string; name: string; address: string | null };
@@ -58,7 +59,9 @@ async function preparePhoto(file: File) {
   }
 }
 
-function PhotoInput({ visitId, kind, saved }: { visitId: string; kind: "before" | "after"; saved: boolean }) {
+function PhotoInput({ visitId, kind, pair, saved, onPending }: {
+  visitId: string; kind: "before" | "after"; pair: number; saved: boolean; onPending: (change: number) => void;
+}) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const title = kind === "before" ? "Before photo" : "After photo";
@@ -70,17 +73,19 @@ function PhotoInput({ visitId, kind, saved }: { visitId: string; kind: "before" 
           const file = input.files?.[0];
           if (!file) return;
           setBusy(true);
+          onPending(1);
           setError("");
           try {
             const form = new FormData();
             form.set("photo", await preparePhoto(file), `${kind}.jpg`);
-            const result = await uploadTeamPhoto(visitId, kind, form);
+            const result = await uploadTeamPhoto(visitId, kind, pair, form);
             setError(result.error ?? "");
           } catch {
             setError("Couldn't read or upload this photo. Retake it and try again.");
           } finally {
             input.value = "";
             setBusy(false);
+            onPending(-1);
           }
         }} />
       </label>}
@@ -90,13 +95,39 @@ function PhotoInput({ visitId, kind, saved }: { visitId: string; kind: "before" 
   );
 }
 
-export function ActiveVisit({ id, checklist, before, after }: { id: string; checklist: string[]; before: boolean; after: boolean }) {
+export function ActiveVisit({ id, checklist, photos }: { id: string; checklist: string[]; photos: string[] }) {
   const [state, action, pending] = useActionState(finishTeamVisit, {});
   const [selected, setSelected] = useState<string[]>([]);
   const [note, setNote] = useState("");
+  const [requestedPairs, setRequestedPairs] = useState(1);
+  const [uploadsPending, setUploadsPending] = useState(0);
+  const onPending = (change: number) => setUploadsPending((count) => count + change);
+  const pairs = Array.from({ length: MAX_PHOTO_PAIRS }, (_, index) => {
+    const number = index + 1;
+    return {
+      number,
+      before: photos.includes(teamPhotoName(number, "before")),
+      after: photos.includes(teamPhotoName(number, "after")),
+    };
+  });
+  const lastUsedPair = Math.max(1, ...pairs.filter((pair) => pair.before || pair.after).map((pair) => pair.number));
+  const visiblePairs = Math.max(requestedPairs, lastUsedPair);
+  const photosReady = pairs[0].before && pairs[0].after && pairs.every((pair) => pair.before === pair.after);
   return (
     <section className="panel team-form">
-      <PhotoInput visitId={id} kind="before" saved={before} />
+      <fieldset className="team-form"><legend>Before &amp; after photos</legend>
+        {pairs.slice(0, visiblePairs).map((pair) => (
+          <fieldset className="team-form" key={pair.number}>
+            <legend>{pair.number === 1 ? "Photo pair 1 (required)" : `Photo pair ${pair.number}`}</legend>
+            <PhotoInput visitId={id} kind="before" pair={pair.number} saved={pair.before} onPending={onPending} />
+            <PhotoInput visitId={id} kind="after" pair={pair.number} saved={pair.after} onPending={onPending} />
+          </fieldset>
+        ))}
+        {visiblePairs < MAX_PHOTO_PAIRS && (
+          <button className="btn ghost" type="button" onClick={() => setRequestedPairs(visiblePairs + 1)}>Add photo pair</button>
+        )}
+        {pairs.some((pair) => pair.before !== pair.after) && <p>Save both photos for every pair you start.</p>}
+      </fieldset>
       <form className="team-form" action={action}>
         <input type="hidden" name="visit" value={id} />
         <fieldset><legend>Cleaning checklist</legend>
@@ -106,12 +137,11 @@ export function ActiveVisit({ id, checklist, before, after }: { id: string; chec
             {task}
           </label>)}
         </fieldset>
-        <PhotoInput visitId={id} kind="after" saved={after} />
         <label>Note for the client (optional)<textarea name="note" maxLength={1000} rows={3}
           value={note} onChange={(event) => setNote(event.target.value)} /></label>
         {state.error && <p role="alert">{state.error}</p>}
         {state.message && <p role="status">{state.message}</p>}
-        <button className="btn primary" disabled={pending || !before || !after || !selected.length}>
+        <button className="btn primary" disabled={pending || uploadsPending > 0 || !photosReady || !selected.length}>
           {pending ? "Finishing…" : "Finish visit"}
         </button>
       </form>

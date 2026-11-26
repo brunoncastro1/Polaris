@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { sendVisitEmail } from "@/lib/email";
 import { teamMember } from "@/lib/team";
+import { MAX_PHOTO_PAIRS, teamPhotoName } from "@/lib/team-photos";
 
 export type VisitState = { error?: string; message?: string };
 const uuid = /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
@@ -31,10 +32,11 @@ export async function startTeamVisit(_: VisitState, form: FormData): Promise<Vis
   return {};
 }
 
-export async function uploadTeamPhoto(visitId: string, kind: "before" | "after", form: FormData): Promise<VisitState> {
+export async function uploadTeamPhoto(visitId: string, kind: "before" | "after", pair: number, form: FormData): Promise<VisitState> {
   const member = await teamMember();
   const file = form.get("photo");
   if (!member || !uuid.test(visitId) || (kind !== "before" && kind !== "after")) return { error: "Visit unavailable." };
+  if (!Number.isInteger(pair) || pair < 1 || pair > MAX_PHOTO_PAIRS) return { error: "Invalid photo pair." };
   if (!(file instanceof File) || file.size < 4 || file.size > 750_000 || file.type !== "image/jpeg") {
     return { error: "Choose a JPEG photo under 750 KB." };
   }
@@ -48,11 +50,12 @@ export async function uploadTeamPhoto(visitId: string, kind: "before" | "after",
     .eq("user_id", member.id).eq("site_id", draft.site_id).maybeSingle();
   if (!assignment) return { error: "Visit unavailable." };
 
-  const { error } = await member.db.storage.from("visit-photos").upload(`team/${visitId}/${kind}.jpg`, bytes, {
+  const path = `team/${visitId}/${teamPhotoName(pair, kind)}`;
+  const { error } = await member.db.storage.from("visit-photos").upload(path, bytes, {
     contentType: "image/jpeg", upsert: false,
   });
   if (error) {
-    const { data: existing } = await member.db.storage.from("visit-photos").exists(`team/${visitId}/${kind}.jpg`);
+    const { data: existing } = await member.db.storage.from("visit-photos").exists(path);
     if (!existing) return { error: "Couldn't save the photo. Please try again." };
   }
   revalidatePath("/team");
@@ -70,7 +73,7 @@ export async function finishTeamVisit(_: VisitState, form: FormData): Promise<Vi
   const { data: visitId, error } = await member.db.rpc("publish_team_visit", {
     p_user: member.id, p_draft: id, p_tasks: tasks, p_note: note,
   });
-  if (error || !visitId) return { error: "Couldn't finish the visit. Confirm both photos are saved and try again." };
+  if (error || !visitId) return { error: "Couldn't finish the visit. Confirm that each photo pair has both a before and an after photo and try again." };
 
   revalidatePath("/team");
   revalidatePath("/portal", "layout");

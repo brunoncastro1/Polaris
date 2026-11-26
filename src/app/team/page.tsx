@@ -39,8 +39,7 @@ export default async function TeamPage() {
         : draft ? site ? <>
           <h2>{site.name}</h2><p>Started at {fmtTime(draft.clock_in)}</p>
           <ActiveVisit key={draft.id} id={draft.id} checklist={draft.checklist}
-            before={photos?.data?.some((photo) => photo.name === "before.jpg") ?? false}
-            after={photos?.data?.some((photo) => photo.name === "after.jpg") ?? false} />
+            photos={photos?.data?.map((photo) => photo.name) ?? []} />
         </> : <p role="alert">Ask your administrator to restore the building assignment to finish this visit.</p>
         : <>
           {published && <p role="status">Last visit published at {fmtTime(published.clock_out)}.
