@@ -141,6 +141,6 @@ Crie uma conta separada de funcionário em Supabase Authentication. No SQL Edito
 o prédio e seu cliente em `team_sites`, e o par usuário/prédio em `team_assignments`. Cada prédio recebe o checklist
 padrão, que pode ser alterado na coluna `checklist`. A equipe entra pela mesma tela de login e só vê os prédios atribuídos.
 
-Na primeira versão, a visita aceita uma foto de antes e uma de depois. As fotos são armazenadas no bucket privado,
+A visita exige um par de fotos e permite até oito pares antes/depois. Aplique também a migração `202611250002_team_photo_pairs.sql` antes de publicar esta versão. As fotos são armazenadas no bucket privado,
 e a localização de chegada, quando autorizada, fica no registro interno da equipe. O cliente só recebe o relatório
 depois que a visita é finalizada. Configure `RESEND_API_KEY` e `EMAIL_FROM` para habilitar a notificação.
